@@ -1,0 +1,8 @@
+,baseline,baseline + detailed prompt,LoRA
+call_validity,85.0,77.5,100.0
+call_accuracy,67.5,57.5,86.2
+abstention,75.0,80.0,95.0
+task_success,67.0,62.0,91.0
+task_success_tool,67.5,57.5,90.0
+task_success_no_tool,65.0,80.0,95.0
+fully_correct,66.0,58.0,88.0
