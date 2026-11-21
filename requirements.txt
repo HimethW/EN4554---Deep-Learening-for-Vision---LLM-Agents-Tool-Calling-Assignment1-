@@ -1,0 +1,7 @@
+# torch comes preinstalled on colab
+# tested with torch 2.14 (cu126), transformers 5.23, peft 0.22, accelerate 1.16
+transformers>=4.56
+peft>=0.17
+accelerate>=1.0
+pandas
+matplotlib
