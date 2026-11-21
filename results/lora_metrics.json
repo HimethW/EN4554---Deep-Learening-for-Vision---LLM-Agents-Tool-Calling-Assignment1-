@@ -1,0 +1,28 @@
+{
+ "call_validity": 100.0,
+ "call_accuracy": 86.2,
+ "abstention": 95.0,
+ "task_success": 91.0,
+ "task_success_tool": 90.0,
+ "task_success_no_tool": 95.0,
+ "fully_correct": 88.0,
+ "n_tool": 80,
+ "n_no_tool": 20,
+ "per_kind_success": {
+  "calc": 85.7,
+  "convert": 100.0,
+  "events": 100.0,
+  "none": 95.0,
+  "parallel": 50.0,
+  "stock": 66.7,
+  "stock_calc": 50.0,
+  "weather": 100.0,
+  "weather_convert": 100.0
+ },
+ "failures": {
+  "missing_call": 2,
+  "wrong_tool": 3,
+  "wrong_argument": 6,
+  "unnecessary_call": 1
+ }
+}
