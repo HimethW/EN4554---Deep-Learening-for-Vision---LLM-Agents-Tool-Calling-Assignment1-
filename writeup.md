@@ -2,25 +2,22 @@
 
 ## 1. Setup
 
-I used Qwen2.5-0.5B-Instruct, since its chat template already supports tool calls. The agent has five tools: a calculator,
-a unit converter, and weather, stock price and calendar lookups that return made-up data, so the model cannot answer from
-memory. The loop generates a reply, runs any tool calls, adds the results to the conversation and repeats until the model
-answers in plain text or four steps have passed. Decoding is greedy and all runs use the same system prompt.
+I used Qwen2.5-0.5B-Instruct, since its chat template already supports tool calls. The agent loop generates a reply, runs any
+tool calls, adds the results to the conversation and repeats until the model answers in plain text or four steps have passed.
+Decoding is greedy and all runs use the same system prompt.
 
-All data was generated from templates with seed 42: 1000 training, 100 validation and 100 test requests. The training set has
-670 single tool calls, 80 two-step requests where the second call needs the first result (e.g. a temperature converted to
-Fahrenheit), 50 requests with two lookups in one turn and 200 requests that need no tool. The test set has 80 tool and 20 no-tool
-requests, written with different templates and including 4 cities and 3 tickers never seen in training.
-
-For LoRA I used rank 16, alpha 32 and dropout 0.05 on all attention and MLP projections, which is 8.8M trainable parameters
-(1.75% of the model). It was trained for 2 epochs with a learning rate of 2e-4 (cosine schedule), an effective batch size of 16
-and fp16, with the loss computed only on the assistant turns. Training took about 17 minutes and the validation loss dropped from
-0.042 after the first epoch to 0.023 after the second.
+- Tools: a calculator, a unit converter, and weather, stock and calendar lookups that return made-up data.
+- Data (templates, seed 42): 1000 training, 100 validation and 100 test requests. Training has 670 single calls, 80 two-step
+  requests, 50 with two lookups in one turn and 200 that need no tool. The test set (80 tool, 20 no-tool) uses different
+  templates and 4 cities and 3 tickers never seen in training.
+- LoRA: rank 16, alpha 32 and dropout 0.05 on all attention and MLP projections (8.8M trainable parameters, 1.75% of the
+  model), 2 epochs, learning rate 2e-4 with a cosine schedule, effective batch size 16, fp16, and loss only on the assistant
+  turns. Training took about 17 minutes and the validation loss went from 0.042 to 0.023.
 
 ## 2. Results
 
-Table 1 compares the untouched model, the same model with a longer system prompt that explains when and how to call each tool,
-and the LoRA model. Validity and accuracy are measured on the 80 tool requests and abstention on the 20 no-tool requests. LoRA
+Table 1 compares the untouched model, the same model with a longer system prompt explaining when and how to call each tool,
+and the LoRA model. Validity and accuracy are measured on the 80 tool requests and abstention on the 20 no-tool ones. LoRA
 improves every metric, most of all on two-step requests, where the base model never made the second call.
 
 **Table 1.** Results on the test set (%).
@@ -35,10 +32,7 @@ improves every metric, most of all on two-step requests, where the base model ne
 
 ## 3. Failure analysis
 
-Table 2 gives each failed test case one category. Most baseline failures were missed tool calls. For indirect questions such as
-"Do I need an umbrella in Kandy today?" it asked the user for the weather instead of calling the tool, and it never chained calls
-(for 99 Microsoft shares it looked up the price and then guessed the total). It also called tools for questions that did not need
-one and refused some general questions. LoRA fixed 25 of the 34 failures, and after training the model never skipped a needed call.
+Table 2 gives each failed case one category. LoRA fixed 25 of the 34 baseline failures, left 9 and introduced 3.
 
 **Table 2.** Failed test cases by category.
 
@@ -52,12 +46,19 @@ one and refused some general questions. LoRA fixed 25 of the 34 failures, and af
 | Wrong answer (no-tool) | 3 | 0 |
 | **Total** | **34** | **12** |
 
-Of the 9 failures LoRA did not fix, 3 come from the ticker NKE, which only appears in the test set: the model misspells it as NEK
-and makes up a price. Another 3 are "How much would one share of Apple cost?", which is close to the training template for buying
-several shares, so the model adds an unneeded calculator call. The rest are two "price for 250 x AMZN stock?" requests that stop
-after the price lookup and a question about the weekend. LoRA also introduced 3 errors the base model did not make: Coca-Cola mapped
-to the wrong ticker, and two "add a and b, then multiply by c" requests turned into the wrong expression. So LoRA learned the format
-and when to use a tool, but it is still weak on inputs unlike the templates. More varied training phrasings would help.
+- Fixed: most baseline failures were missed tool calls. For indirect questions such as "Do I need an umbrella in Kandy
+  today?" the base model asked the user for the weather instead of calling the tool, and it never chained calls (for 99
+  Microsoft shares it looked up the price and then guessed the total). It also called tools when none was needed and
+  refused some general questions. After training the model never skipped a needed call.
+- Not fixed: 3 cases come from the ticker NKE, which only appears in the test set. The model misspells it as NEK and
+  makes up a price. Another 3 are "How much would one share of Apple cost?", which is close to the training template for
+  buying several shares, so the model adds an unneeded calculator call. The rest are two "price for 250 x AMZN stock?"
+  requests that stop after the price lookup and a question about the weekend.
+- Introduced: Coca-Cola mapped to the wrong ticker, and two "add a and b, then multiply by c" requests turned into the
+  wrong expression, which the base model got right.
+
+Overall, LoRA learned the format and when to use a tool, but it is still weak on inputs unlike the templates. More varied
+training phrasings would help.
 
 ## 4. Would a better prompt have been enough?
 
