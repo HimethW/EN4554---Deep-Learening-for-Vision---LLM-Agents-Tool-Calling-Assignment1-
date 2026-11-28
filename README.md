@@ -2,13 +2,13 @@
 
 Small agent built on **Qwen2.5-0.5B-Instruct**, LoRA-finetuned to call tools, and compared against the untouched model.
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HimethW/EN4554---Deep-Learening-for-Vision---LLM-Agents-Tool-Calling-Assignment1-/blob/main/tool_calling.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/HimethW/EN4554---Deep-Learening-for-Vision---LLM-Agents-Tool-Calling-Assignment1-/blob/main/Assignment1_task2_LLM-Agents_Tool-Calling.ipynb)
 
 ## Files
 
 | file | what it does |
 |---|---|
-| `tool_calling.ipynb` | runs everything: data, agent demo, baseline eval, LoRA training, LoRA eval, failure analysis |
+| `Assignment1_task2_LLM-Agents_Tool-Calling.ipynb` | runs everything: data, agent demo, baseline eval, LoRA training, LoRA eval, failure analysis |
 | `tools.py` | the 5 tools (calculator, convert_units, get_weather, get_stock_price, get_events) + their JSON schemas |
 | `agent.py` | agent loop: generate -> parse `<tool_call>` -> run tool -> feed result back, stops on a plain answer or after 4 steps |
 | `make_data.py` | generates train / val / test from templates (seed 42) |
